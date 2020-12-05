@@ -88,7 +88,7 @@ bash or zsh. You are going to learn a lot about processes and file descriptors.
 ## How To Use
 > Deployment
 ```shell
-git clone https://github.com/j53rran0/minishell.git
+git clone https://github.com/parmarti/minishell.git
 make && ./minishell
 ```
 
