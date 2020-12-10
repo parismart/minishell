@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   env.c                                              :+:      :+:    :+:   */
+/*   unset.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/11/22 15:42:40 by marvin            #+#    #+#             */
-/*   Updated: 2020/12/04 15:43:49 by marvin           ###   ########.fr       */
+/*   Updated: 2020/12/10 13:46:56 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,20 +21,19 @@ static char	**erase_env(char **envp, int i)
 	len = 0;
 	while (envp[len])
 		len++;
-	if (!(cpy = (char **)malloc(sizeof(char *) * len)))
-		return (0);
+	if (!(cpy = (char **)ft_calloc(sizeof(char *), len)))
+		return (NULL);
 	j = -1;
 	while (++j < i)
 		cpy[j] = ft_strdup(envp[j]);
 	i++;
 	while (envp[i])
 		cpy[j++] = ft_strdup(envp[i++]);
-	cpy[j] = 0;
-	free_env(envp);
+	free_matrix(envp);
 	return (cpy);
 }
 
-char		**unset_command(t_data *param)
+char		**unset_command(t_data *param, int j)
 {
 	int		i;
 	int		len;
@@ -43,8 +42,8 @@ char		**unset_command(t_data *param)
 
 	if (param->argc < 2)
 		return (param->envp);
-	len = strlen(param->argv[1]);
-	env = ft_strjoin(param->argv[1], "=");
+	len = strlen(param->argv[j]);
+	env = ft_strjoin(param->argv[j], "=");
 	i = 0;
 	while (param->envp[i] && ft_memcmp(env, param->envp[i], len + 1))
 		i++;
@@ -54,45 +53,4 @@ char		**unset_command(t_data *param)
 		cpy = param->envp;
 	free(env);
 	return (cpy);
-}
-
-char		**export_command(t_data *param)
-{
-	int		i;
-	char	**cpy;
-
-	i = 0;
-	while (param->envp[i] &&
-		ft_memcmp(param->envp[i], param->argv[1], ft_strlen(param->argv[1])))
-		i++;
-	if (!param->envp[i])
-	{
-		cpy = copy_env(param->envp, 1);
-		cpy[i] = ft_strjoin(param->argv[1], param->argv[2]);
-		free_env(param->envp);
-	}
-	else
-	{
-		cpy = param->envp;
-		free(param->envp[i]);
-		param->envp[i] = ft_strjoin(param->argv[1], param->argv[2]);
-	}
-	return (cpy);
-}
-
-void		env_command(t_data *param, int fd)
-{
-	int	i;
-
-	i = 0;
-	if (param->argc != 1)
-	{
-		ft_putstr_fd("Wrong number arguments in 'env'!\n", 1);
-		return ;
-	}
-	while (param->envp[i])
-	{
-		ft_putstr_fd(param->envp[i++], fd);
-		write(fd, "\n", 1);
-	}
 }

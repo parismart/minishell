@@ -6,7 +6,7 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/07/01 12:06:20 by jserrano          #+#    #+#             */
-/*   Updated: 2020/12/02 14:06:07 by marvin           ###   ########.fr       */
+/*   Updated: 2020/12/10 15:39:17 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,8 +56,10 @@ void			ft_putchar_fd(char c, int fd);
 void			ft_putendl_fd(char *s, int fd);
 void			ft_putnbr_fd(int n, int fd);
 void			ft_putstr_fd(char *s, int fd);
+void			ft_putstrlen_fd(char *s, int len, int fd);
 int				ft_putstrs_fd(char *before, char *str, char *after, int fd);
 char			**ft_split(char const *s, char c);
+char			**ft_split_case(char *s, char c);
 char			*ft_strjoin(char *s1, char *s2);
 char			*ft_strmapi(char const *s, char (*f)(unsigned int, char));
 char			*ft_strtrim(char const *s1, char const *set);
@@ -74,5 +76,6 @@ void			ft_lstiter(t_list *lst, void (*f)(void *));
 t_list			*ft_lstmap(t_list *lst,\
 				void *(*f)(void *), void (*del)(void *));
 int				get_next_line(int fd, char **line);
+void			ft_addchr(char **str, char c);
 
 #endif

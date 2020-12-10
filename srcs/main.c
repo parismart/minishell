@@ -6,21 +6,20 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/11/16 15:16:03 by marvin            #+#    #+#             */
-/*   Updated: 2020/12/05 12:17:41 by marvin           ###   ########.fr       */
+/*   Updated: 2020/12/10 15:46:24 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-static void	put_prompt(char **envp)
+void		put_prompt(char **envp)
 {
 	char	*home;
 	char	*path;
-	char	*cwd;
-	char	buff[4097];
+	char	cwd[4097];
 
 	home = get_env(envp, "HOME");
-	cwd = getcwd(buff, 4096);
+	getcwd(cwd, 4096);
 	if (ft_memcmp(cwd, home, ft_strlen(home)))
 		path = ft_strdup(cwd);
 	else
@@ -32,53 +31,80 @@ static void	put_prompt(char **envp)
 
 static void	sig_handler(int sig)
 {
-	char *cwd;
-	char buff[4097];
+	char cwd[4097];
 
 	if (sig == SIGINT)
 	{
-		cwd = getcwd(buff, 4096);
+		getcwd(cwd, 4096);
 		write(1, "\n", 1);
-		write(1, "\033[1;31mminishell@PARMART-JSERRAN\033[0;0m", 38);
+		write(1, "\r\033[1;31mminishell@PARMART-JSERRAN\033[0;0m", 39);
 		ft_putstrs_fd(":\033[1;34m", cwd, "\033[0;0m$ ", 1);
-		signal(SIGINT, sig_handler);
 	}
-	else if (sig == SIGQUIT)
-		exit(0);
 }
 
-static void	init_param(t_data **param, char **argv, char **envp)
+static void	init_param(t_data **param, char **argv, char **envp, int *ret_len)
 {
 	(*param) = (t_data *)malloc(sizeof(t_data));
 	(*param)->envp = copy_env(envp, 0);
+	(*param)->export = (char **)ft_calloc(sizeof(char *), 1);
 	(*param)->argv = argv;
 	(*param)->ret = 0;
+	(*param)->str = 0;
 	(*param)->child = 0;
+	ret_len[0] = 1;
+}
+
+static void	print_welcome_msg(void)
+{
+	ft_putstr_fd("                                        \n", 2);
+	ft_putstr_fd("               ▄█████████▄              \n", 2);
+	ft_putstr_fd("            ▄███████████████▄           \n", 2);
+	ft_putstr_fd("         ██████▀   ██   ▀███████        \n", 2);
+	ft_putstr_fd("      ███   ▀███   ██   ███▀   ███      \n", 2);
+	ft_putstr_fd("     ██████   ██   ██   ██   ██████     \n", 2);
+	ft_putstr_fd("     ██   ██   ██  ██  ██   ██   ██     \n", 2);
+	ft_putstr_fd("    ███    ██  ██  ██  ██  ██    ███    \n", 2);
+	ft_putstr_fd("    ██ ██   ██  █  ██  █  ██   ██ ██    \n", 2);
+	ft_putstr_fd("    ██  ███  ██ ██ ██ ██ ██  ███  ██    \n", 2);
+	ft_putstr_fd("    ██    ██  ██ █ ██ █ ██  ██    ██    \n", 2);
+	ft_putstr_fd("    ████▄   ██ █  █  █  █ ██   ▄████    \n", 2);
+	ft_putstr_fd("       ████   █          █   ████       \n", 2);
+	ft_putstr_fd("          ██                ██          \n", 2);
+	ft_putstr_fd("          ████████▄  ▄████████          \n", 2);
+	ft_putstr_fd("                  ▀██▀                  \n", 2);
+	ft_putstr_fd("           _       _     _          _ _ \n", 2);
+	ft_putstr_fd(" _ __ ___ (_)_ __ (_)___| |__   ___| | |\n", 2);
+	ft_putstr_fd("| '_ ` _ \\| | '_ \\| / __| '_ \\ / _ \\ | |\n", 2);
+	ft_putstr_fd("| | | | | | | | | | \\__ \\ | | |  __/ | |\n", 2);
+	ft_putstr_fd("|_| |_| |_|_|_| |_|_|___/_| |_|\\___|_|_|\n\n", 2);
 }
 
 int			main(int argc, char **argv, char **envp)
 {
 	t_data	*param;
-	int		input;
+	int		ret_len[2];
+	char	c;
 
 	if (argc != 1)
 		return (1);
-	init_param(&param, argv, envp);
+	init_param(&param, argv, envp, ret_len);
+	print_welcome_msg();
 	signal(SIGQUIT, sig_handler);
 	while (1)
 	{
-		put_prompt(param->envp);
+		if (ret_len[0])
+			put_prompt(param->envp);
 		signal(SIGINT, sig_handler);
-		param->str = 0;
-		if (!(input = get_next_line(1, &(param->str)))
-				&& !ft_strlen(param->str))
+		while ((ret_len[0] = read(1, &c, 1)) && c != '\n')
+			ft_addchr(&(param->str), c);
+		ret_len[1] = (int)ft_strlen(param->str);
+		if (c == '\n')
+			parser(param);
+		if (!ret_len[0] && !ret_len[1])
 		{
-			free(param->str);
 			ft_putstr_fd("\nlogout\n", 1);
 			exit(0);
 		}
-		else if (input)
-			envp = parser(param->str, param);
 	}
 	return (0);
 }

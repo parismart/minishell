@@ -6,52 +6,77 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/12/01 18:22:40 by marvin            #+#    #+#             */
-/*   Updated: 2020/12/05 09:31:19 by parmarti         ###   ########.fr       */
+/*   Updated: 2020/12/10 14:05:21 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-static int	redirect(char *str)
+static int	redirect(t_data *param, int i, int fd)
 {
-	int		append;
-	int		len;
-	int		fd;
+	int		ret;
 	char	c;
 
-	fd = 1;
-	str++;
-	append = (*str == '>') ? 1 : 0;
-	skip_spaces(&str);
-	if (append)
+	while (param->argv[i] && (!ft_memcmp(param->argv[i], ">", 2) ||
+			!ft_memcmp(param->argv[i], ">>", 3)))
 	{
-		str++;
-		skip_spaces(&str);
-		fd = open(str, O_RDWR | O_CREAT | O_APPEND, 0666);
-		while ((len = read(fd, &c, 1)))
-			if (len == -1)
-			{
-				write(1, "Couldn't read file\n", 19);
-				break ;
-			}
+		if (!ft_memcmp(param->argv[i], ">", 2))
+			fd = open(param->argv[i + 1], O_RDWR | O_CREAT | O_TRUNC, 0666);
+		else
+		{
+			fd = open(param->argv[i + 1], O_RDWR | O_CREAT | O_APPEND, 0666);
+			ret = 0;
+			while ((ret = read(fd, &c, 1)))
+				if (ret == -1)
+				{
+					write(1, "Couldn't read file\n", 19);
+					break ;
+				}
+		}
+		i += 2;
+		if (param->argv[i])
+			close(fd);
 	}
-	else
-		fd = open(str, O_RDWR | O_CREAT | O_TRUNC, 0666);
 	return (fd);
 }
 
-static int	set_fd(char *str)
+static int	set_fd(t_data *param)
 {
-	int fd;
+	int		i;
+	int		fd;
 
+	i = 0;
 	fd = 1;
-	while (*str && *str != '>')
-		str++;
-	if (*str == '>')
-		fd = redirect(str);
-	if (fd < 0)
-		write(1, "Couldn't open file\n", 19);
-	return (fd);
+	while (param->argv[i] && ft_memcmp(param->argv[i], ">", 2)
+			&& ft_memcmp(param->argv[i], ">>", 3))
+		i++;
+	if (!param->argv[i])
+		return (1);
+	return (redirect(param, i, fd));
+}
+
+static void	copy_args1(t_data *param)
+{
+	int		i;
+	char	**args;
+
+	i = 0;
+	while (param->argv[i] &&
+			ft_memcmp(param->argv[i], ">", 2) &&
+			ft_memcmp(param->argv[i], ">>", 3))
+		i++;
+	args = ft_calloc(sizeof(char *), i + 1);
+	i = 0;
+	while (param->argv[i] &&
+			ft_memcmp(param->argv[i], ">", 2) &&
+			ft_memcmp(param->argv[i], ">>", 3))
+	{
+		args[i] = ft_strdup(param->argv[i]);
+		i++;
+	}
+	free_matrix(param->argv);
+	param->argv = args;
+	param->argc = 0;
 }
 
 char		**check_command(char *str, t_data *param)
@@ -63,17 +88,20 @@ char		**check_command(char *str, t_data *param)
 	set_args(param->argv, str, param->argc);
 	if (param->argv[0] && *(param->argv[0]))
 	{
-		fd = set_fd(str);
+		fd = set_fd(param);
+		copy_args1(param);
+		while (param->argv[param->argc])
+			(param->argc)++;
 		param->ret = check_builtins(fd, param);
-		if (param->ret && (param->ret = check_bin(fd, param)))
+		if (param->ret == 127 && (param->ret = check_bin(fd, param)) == 127)
 		{
 			ft_putstrs_fd(0, str, ": command not found.\n", 1);
 			param->ret = 127;
 		}
-		if (fd > 1)
+		if (fd != 1)
 			close(fd);
 	}
-	free_env(param->argv);
+	free_matrix(param->argv);
 	param->argc = 0;
 	return (param->envp);
 }

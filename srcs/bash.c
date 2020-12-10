@@ -6,7 +6,7 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/11/17 19:50:12 by marvin            #+#    #+#             */
-/*   Updated: 2020/12/05 12:14:50 by marvin           ###   ########.fr       */
+/*   Updated: 2020/12/08 20:27:50 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,20 +19,22 @@ static void	check_type(t_data *param, char *str, char *path)
 
 	if (errno == ENOENT || errno == EACCES)
 	{
-		ft_putstrs_fd("-bash: ", str, ": ", 1);
+		ft_putstrs_fd("bash: ", str, ": ", 1);
 		ft_putstrs_fd(strerror(errno), "\n", 0, 1);
+		param->ret = (errno == ENOENT) ? 127 : 126;
 	}
 	else if (!(dir = opendir(path)))
 	{
 		fd = open(path, O_RDONLY, 0666);
 		free(param->str);
 		while (get_next_line(fd, &(param->str)))
-			param->envp = parser(param->str, param);
+			parser(param);
 		close(fd);
 	}
 	else
 	{
 		ft_putstrs_fd("-bash: ", str, ": Is a directory\n", 1);
+		param->ret = 126;
 		closedir(dir);
 	}
 }
@@ -54,11 +56,13 @@ static void	set_filename(int len, char **new, char *str)
 			len--;
 		len--;
 	}
-	(*new)[len + 1] = 0;
-	aux = ft_strjoin(*new, "/");
+	aux = ft_strldup(*new, len);
 	free(*new);
-	*new = ft_strjoin(aux, filename);
+	*new = ft_strjoin(aux, "/");
 	free(aux);
+	aux = ft_strjoin(*new, filename);
+	free(*new);
+	*new = aux;
 	free(filename);
 }
 
@@ -80,6 +84,15 @@ static void	set_path(char *str, char **path)
 	free(new);
 }
 
+static void	child_sig_handler_bash(int sig)
+{
+	if (sig == SIGINT)
+	{
+		write(1, "\n", 1);
+		exit(0);
+	}
+}
+
 void		bash_command(t_data *param)
 {
 	char	buff[4097];
@@ -91,12 +104,12 @@ void		bash_command(t_data *param)
 		param->argv[0] += (!ft_memcmp(param->argv[0], "./", 2)) ? 2 : 0;
 	path = getcwd(buff, 4096);
 	set_path(param->argv[0], &path);
-	signal(SIGINT, child_sig_handler);
 	if (!fork())
 	{
+		signal(SIGINT, child_sig_handler_bash);
 		if (execve(path, param->argv, param->envp))
 			check_type(param, start, path);
-		exit(0);
+		exit(param->ret);
 	}
 	else
 		wait(&param->ret);
