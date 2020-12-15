@@ -6,34 +6,47 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/11/17 19:50:12 by marvin            #+#    #+#             */
-/*   Updated: 2020/12/08 20:27:50 by marvin           ###   ########.fr       */
+/*   Updated: 2020/12/13 14:48:24 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
+static int	check_errno(t_data *param, char *str)
+{
+	if (errno == ENOENT || errno == EACCES)
+	{
+		ft_putstrs_fd("bash: ", str, ": ", 2);
+		ft_putstrs_fd(strerror(errno), "\n", 0, 2);
+		param->ret = (errno == ENOENT) ? 127 : 126;
+		return (1);
+	}
+	return (0);
+}
+
 static void	check_type(t_data *param, char *str, char *path)
 {
 	DIR			*dir;
 	int			fd;
+	char		**cmds;
 
-	if (errno == ENOENT || errno == EACCES)
-	{
-		ft_putstrs_fd("bash: ", str, ": ", 1);
-		ft_putstrs_fd(strerror(errno), "\n", 0, 1);
-		param->ret = (errno == ENOENT) ? 127 : 126;
-	}
+	if (check_errno(param, str))
+		return ;
 	else if (!(dir = opendir(path)))
 	{
 		fd = open(path, O_RDONLY, 0666);
 		free(param->str);
 		while (get_next_line(fd, &(param->str)))
+		{
+			cmds = param->cmds;
 			parser(param);
+			param->cmds = cmds;
+		}
 		close(fd);
 	}
 	else
 	{
-		ft_putstrs_fd("-bash: ", str, ": Is a directory\n", 1);
+		ft_putstrs_fd("-bash: ", str, ": Is a directory\n", 2);
 		param->ret = 126;
 		closedir(dir);
 	}
@@ -82,15 +95,6 @@ static void	set_path(char *str, char **path)
 		return ;
 	}
 	free(new);
-}
-
-static void	child_sig_handler_bash(int sig)
-{
-	if (sig == SIGINT)
-	{
-		write(1, "\n", 1);
-		exit(0);
-	}
 }
 
 void		bash_command(t_data *param)

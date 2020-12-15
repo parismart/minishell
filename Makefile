@@ -13,6 +13,7 @@ SRCS =	srcs/main.c\
 		srcs/unset.c\
 		srcs/utils.c\
 		srcs/lens.c\
+		srcs/remove.c\
 		srcs/exit.c\
 
 OBJS = $(SRCS:.c=.o)
@@ -20,6 +21,8 @@ OBJS = $(SRCS:.c=.o)
 CC = gcc
 
 CFLAGS += -Wall -Werror -Wextra -g3 -fsanitize=address
+
+#CFLAGS += -g3 -fsanitize=address
 
 RM = rm -rf
 

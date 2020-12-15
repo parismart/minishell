@@ -6,7 +6,7 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/11/17 00:01:09 by marvin            #+#    #+#             */
-/*   Updated: 2020/12/10 13:24:56 by marvin           ###   ########.fr       */
+/*   Updated: 2020/12/13 13:46:21 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,8 @@ static char	**multiple_env(t_data *param, int fd)
 	int i;
 
 	param->ret = 0;
-	if (!ft_memcmp(param->argv[0], "export", 7) && param->argc == 1)
+	if (!ft_memcmp(param->argv[0], "export", 7) && param->argc == 1 &&
+		!ft_strlen(param->argv[1]))
 	{
 		sort_envp(param->envp, fd, '=');
 		sort_envp(param->export, fd, 0);
@@ -46,7 +47,7 @@ static void	env_command(t_data *param, int fd)
 	i = 0;
 	if (param->argc != 1)
 	{
-		ft_putstrs_fd("env: ‘", param->argv[1], "’: Permission denied\n", 1);
+		ft_putstrs_fd("env: ‘", param->argv[1], "’: Permission denied\n", 2);
 		param->ret = 126;
 		return ;
 	}
@@ -62,10 +63,10 @@ static void	echo_command(t_data *param, int fd)
 	while (++i < param->argc)
 	{
 		ft_putstr_fd(param->argv[i], fd);
-		if (i < param->argc - 1)
+		if (i < param->argc - 1 && ft_strlen(param->argv[i + 1]))
 			write(fd, " ", 1);
 	}
-	if (param->argc > 1 && ft_memcmp(param->argv[1], "-n", 3))
+	if (!(param->argc > 1 && !ft_memcmp(param->argv[1], "-n", 3)))
 		write(fd, "\n", 1);
 }
 

@@ -1,23 +1,19 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_calloc.c                                        :+:      :+:    :+:   */
+/*   ft_skip_spaces.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2020/07/01 08:53:09 by jserrano          #+#    #+#             */
-/*   Updated: 2020/12/13 14:33:48 by marvin           ###   ########.fr       */
+/*   Created: 2020/12/13 12:55:31 by marvin            #+#    #+#             */
+/*   Updated: 2020/12/13 14:01:45 by parmarti         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
 
-void	*ft_calloc(size_t nmemb, size_t size)
+void	skip_spaces(char **str)
 {
-	unsigned char	*ptr;
-
-	if (!(ptr = malloc(nmemb * size)))
-		return (NULL);
-	ft_memset(ptr, 0, nmemb * size);
-	return ((void *)ptr);
+	while (**str == ' ' || (9 <= **str && **str <= 13))
+		(*str)++;
 }

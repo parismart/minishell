@@ -6,7 +6,7 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/11/22 15:41:14 by marvin            #+#    #+#             */
-/*   Updated: 2020/12/09 23:04:13 by marvin           ###   ########.fr       */
+/*   Updated: 2020/12/13 14:36:00 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,25 +15,16 @@
 void	child_sig_handler(int sig)
 {
 	if (sig == SIGINT)
-		write(1, "\n", 1);
+		write(2, "\n", 1);
 }
 
-void	skip_spaces(char **str)
+void	child_sig_handler_bash(int sig)
 {
-	while (**str == ' ' || (9 <= **str && **str <= 13))
-		(*str)++;
-}
-
-void	free_matrix(char **matrix)
-{
-	int	i;
-
-	i = 0;
-	if (!matrix)
-		return ;
-	while (matrix[i])
-		free(matrix[i++]);
-	free(matrix);
+	if (sig == SIGINT)
+	{
+		write(2, "\n", 1);
+		exit(0);
+	}
 }
 
 char	*get_env(char **envp, char *env)
@@ -70,4 +61,11 @@ char	**copy_env(char **envp, int add)
 	while (++i < len)
 		cpy[i] = ft_strdup(envp[i]);
 	return (cpy);
+}
+
+int		is_token(char c)
+{
+	if (c == '"' || c == '\\')
+		return (1);
+	return (0);
 }

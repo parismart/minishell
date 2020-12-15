@@ -6,7 +6,7 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/07/01 12:06:20 by jserrano          #+#    #+#             */
-/*   Updated: 2020/12/10 15:39:17 by marvin           ###   ########.fr       */
+/*   Updated: 2020/12/13 14:56:09 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,7 @@ char			*ft_strnstr(const char *big, const char *little, size_t len);
 void			ft_strncpy(char *dst, const char *src, size_t size);
 int				ft_strncmp(const char *s1, const char *s2, size_t n);
 int				ft_atoi(const char *nptr);
+int				ft_isspace(int c);
 int				ft_isalpha(int c);
 int				ft_isdigit(int c);
 int				ft_isalnum(int c);
@@ -75,7 +76,9 @@ void			ft_lstclear(t_list **lst, void (*del)(void *));
 void			ft_lstiter(t_list *lst, void (*f)(void *));
 t_list			*ft_lstmap(t_list *lst,\
 				void *(*f)(void *), void (*del)(void *));
-int				get_next_line(int fd, char **line);
 void			ft_addchr(char **str, char c);
+void			skip_spaces(char **str);
+void			free_matrix(char **matrix);
+int				get_next_line(int fd, char **line);
 
 #endif
