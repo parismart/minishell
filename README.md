@@ -1,5 +1,5 @@
 # minishell
-[![42Project Score](https://badge42.herokuapp.com/api/project/parmarti/minishell)](https://github.com/JaeSeoKim/badge42)
+[![parmarti's 42 minishell Score](https://badge42.vercel.app/api/v2/cl1lvrz0z002109lhozldfih2/project/2036950)](https://github.com/JaeSeoKim/badge42)
 
 ### Index 📋
 You're sections headers will be used to reference location of destination.
